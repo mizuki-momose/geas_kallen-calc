@@ -8,10 +8,11 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
+import { PieChart } from '@mui/x-charts';
 import { InputArea } from './InputArea';
 import { probCalc } from './func';
-import Typography from '@mui/material/Typography';
 
 export const ElementsArr = [
   'all_games',
@@ -238,27 +239,35 @@ export type InputForm = {
 const getKeys = <T extends Record<string, unknown>>(obj: T): (keyof T)[] =>
   Object.keys(obj);
 
+const defaultValues = ElementsArr.reduce((a, c) => {
+  a[c] = '';
+  return a;
+}, {} as InputForm);
+
+const FlexCenterBox = ({ children }: { children: React.ReactNode }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+    }}
+  >
+    {children}
+  </Box>
+);
+
 const App = (): JSX.Element => {
   const [settings, setSettings] = useState(Array<string>(6).fill('-'));
-
-  const defaultValues = ElementsArr.reduce((a, c) => {
-    a[c] = '';
-    return a;
-  }, {} as InputForm);
 
   const { register, handleSubmit, reset } = useForm<InputForm>({
     defaultValues,
   });
 
   const onSubmit: SubmitHandler<InputForm> = async (data) => {
-    const checkData = ElementsArr.reduce(
-      (a, c) => {
-        const num = data[c];
-        if (num !== '') a[c] = num;
-        return a;
-      },
-      {} as { [key in Elements]?: number },
-    );
+    const checkData = ElementsArr.reduce((a, c) => {
+      const num = data[c];
+      if (num !== '') a[c] = num;
+      return a;
+    }, {} as { [key in Elements]?: number });
 
     const results = await Promise.all(
       getKeys(checkData).flatMap((key) => {
@@ -275,19 +284,19 @@ const App = (): JSX.Element => {
         const p1 = data.child || 1;
 
         return [probCalc(n, k, p1, data.prob)];
-      }),
+      })
     );
 
     if (results.length === 0) return setSettings(Array(6).fill('-'));
 
     const ratio = results.reduce(
       (a, c) => a.map((v, i) => v * c[i]),
-      Array<number>(6).fill(1),
+      Array<number>(6).fill(1)
     );
     const ratioSum = ratio.reduce((a, c) => a + c);
 
     setSettings(
-      ratio.map((r) => (Math.round((r / ratioSum) * 1000) / 10).toString()),
+      ratio.map((r) => (Math.round((r / ratioSum) * 1000) / 10).toString())
     );
   };
 
@@ -301,13 +310,13 @@ const App = (): JSX.Element => {
     <>
       <CssBaseline />
       <Container>
-      <Typography variant="h3">判別機</Typography>
+        <Typography variant="h3">判別機</Typography>
         <Grid container spacing={2} sx={{ my: 2 }}>
           <Grid xs={12} md={8}>
             <InputArea register={register} />
           </Grid>
           <Grid xs={12} md={4}>
-            <Box>
+            <FlexCenterBox>
               <Stack spacing={2} direction="row">
                 <Button
                   onClick={handleSubmit(onSubmit)}
@@ -320,8 +329,8 @@ const App = (): JSX.Element => {
                   リセット
                 </Button>
               </Stack>
-            </Box>
-            <Box>
+            </FlexCenterBox>
+            <FlexCenterBox>
               <List dense={true}>
                 {settings.map((v, i) => (
                   <ListItem key={i}>
@@ -329,7 +338,22 @@ const App = (): JSX.Element => {
                   </ListItem>
                 ))}
               </List>
-            </Box>
+            </FlexCenterBox>
+            <FlexCenterBox>
+              <PieChart
+                series={[
+                  {
+                    data: settings.map((v, i) => ({
+                      id: i,
+                      value: v === '-' ? 20 : +v,
+                      label: `設定${i + 1}`,
+                    })),
+                  },
+                ]}
+                width={400}
+                height={200}
+              />
+            </FlexCenterBox>
           </Grid>
         </Grid>
       </Container>

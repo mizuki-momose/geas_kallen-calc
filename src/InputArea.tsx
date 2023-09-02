@@ -77,7 +77,7 @@ export const InputArea = (props: {
   register: UseFormRegister<InputForm>;
 }): JSX.Element => {
   const { register } = props;
-  const [tab, setTab] = useState('1');
+  const [tab, setTab] = useState('0');
 
   const handleChange = (_: unknown, newValue: string) => setTab(newValue);
 
@@ -86,7 +86,7 @@ export const InputArea = (props: {
       <Box sx={{ width: '100%', typography: 'body1' }}>
         <TabContext value={tab}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <TabList onChange={handleChange} aria-label="lab API tabs example">
+            <TabList onChange={handleChange}>
               {InpuitList.map(({ label }, i) => (
                 <Tab key={i} label={label} value={i.toString()} />
               ))}
