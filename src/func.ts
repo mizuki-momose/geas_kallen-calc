@@ -1,6 +1,6 @@
 const eratosthenes = (n: number) => {
-  const primes = [];
-  const isPrime = new Array(n + 1).fill(true);
+  const primes: number[] = [];
+  const isPrime = Array<boolean>(n + 1).fill(true);
 
   for (let i = 2; i <= n; i++) {
     if (isPrime[i]) {
@@ -15,7 +15,7 @@ const eratosthenes = (n: number) => {
 };
 
 const primeFactorizeKaijo = (n: number, primeNumbers: number[]) => {
-  const res: { [key: number]: number } = {};
+  const res = new Map<number, number>();
 
   primeNumbers.forEach((i) => {
     if (i > n) return;
@@ -25,25 +25,21 @@ const primeFactorizeKaijo = (n: number, primeNumbers: number[]) => {
       restemp += Math.trunc(n / temp);
       temp *= i;
     }
-    res[i] = restemp;
+    res.set(i, restemp);
   });
 
   return res;
 };
 
 const primeFactorize = (n: number, primeNumbers: number[]) => {
-  const res: { [key: number]: number } = {};
+  const res = new Map<number, number>();
   let temp = n;
 
   primeNumbers.forEach((i) => {
     if (i > temp) return;
 
     while (temp % i == 0) {
-      if (i in res) {
-        res[i] += 1;
-      } else {
-        res[i] = 1;
-      }
+      res.set(i, res.has(i) ? res.get(i)! + 1 : 1);
       temp /= i;
     }
   });
@@ -53,64 +49,53 @@ const primeFactorize = (n: number, primeNumbers: number[]) => {
 
 const calculatePowMul = (
   ans: number[],
-  fact: { [key: number]: number },
-  power: number,
+  fact: Map<number, number>,
+  power: number
 ) => {
-  Object.entries(fact).forEach(([k, v]) => {
-    ans[+k] += v * power;
+  fact.forEach((v, k) => {
+    ans[k] += v * power;
   });
 };
 
-const getPow = async (obj: { [key: number]: number }) =>
-  Object.entries(obj).reduce((a, [k, v]) => a * BigInt(k) ** BigInt(v), 1n);
+const getPow = async (obj: Map<number, number>) =>
+  [...obj].reduce((a, [k, v]) => a * BigInt(k) ** BigInt(v), 1n);
 
-const calc = async (n: number, k: number, p1: number, p2: number) => {
+export const probCalc = async (
+  n: number,
+  k: number,
+  p1: number,
+  p2: number
+) => {
   if (p2 === 0) return 0;
 
   const max_int = Math.max(n, k, p1, p2);
 
   const primeNumbers = eratosthenes(max_int);
 
-  const pbunbo_fact = primeFactorize(p2, primeNumbers);
-  const pbunshi_fact = primeFactorize(p1, primeNumbers);
-  const qbunshi_fact = primeFactorize(p2 - p1, primeNumbers);
-  const nkaijo_fact = primeFactorizeKaijo(n, primeNumbers);
-  const kkaijo_fact = primeFactorizeKaijo(k, primeNumbers);
-  const nmkkaijo_fact = primeFactorizeKaijo(n - k, primeNumbers);
+  const ans = Array<number>(max_int + 1).fill(0);
+  calculatePowMul(ans, primeFactorize(p2, primeNumbers), -n);
+  calculatePowMul(ans, primeFactorize(p1, primeNumbers), k);
+  calculatePowMul(ans, primeFactorize(p2 - p1, primeNumbers), n - k);
+  calculatePowMul(ans, primeFactorizeKaijo(n, primeNumbers), 1);
+  calculatePowMul(ans, primeFactorizeKaijo(k, primeNumbers), -1);
+  calculatePowMul(ans, primeFactorizeKaijo(n - k, primeNumbers), -1);
 
-  const ans: number[] = new Array(max_int + 1).fill(0);
-  calculatePowMul(ans, pbunbo_fact, -n);
-  calculatePowMul(ans, pbunshi_fact, k);
-  calculatePowMul(ans, qbunshi_fact, n - k);
-  calculatePowMul(ans, nkaijo_fact, 1);
-  calculatePowMul(ans, kkaijo_fact, -1);
-  calculatePowMul(ans, nmkkaijo_fact, -1);
-
-  const plus: { [key: number]: number } = {};
-  const minus: { [key: number]: number } = {};
+  const plus = new Map<number, number>();
+  const minus = new Map<number, number>();
   primeNumbers.forEach((i) => {
-    if (ans[i] > 0) plus[i] = ans[i];
-    if (ans[i] < 0) minus[i] = Math.abs(ans[i]);
+    if (ans[i] > 0) plus.set(i, ans[i]);
+    if (ans[i] < 0) minus.set(i, Math.abs(ans[i]));
   });
 
   let [powplus, powminus] = await Promise.all([getPow(plus), getPow(minus)]);
 
-  const length = powplus.toString().length;
+  const ajust = powplus.toString().length - 15;
 
-  if (length > 15) {
-    const adjust = 10n ** BigInt(length - 15);
+  if (ajust > 0) {
+    const adjust = 10n ** BigInt(ajust);
     powplus /= adjust;
     powminus /= adjust;
   }
 
   return Number(powplus) / Number(powminus);
-};
-
-export const probCalc = async (
-  n: number,
-  k: number,
-  p1: number,
-  probArr: number[],
-) => {
-  return Promise.all(probArr.map((p2) => calc(n, k, p1, p2)));
 };

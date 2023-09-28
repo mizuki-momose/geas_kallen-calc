@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -47,204 +47,280 @@ export const ElementsArr = [
 
 export type Elements = (typeof ElementsArr)[number];
 
-const CalcData: {
-  [key in Elements]?: {
-    child?: number;
-    prob: number[];
-    kKeys: Elements[];
-  };
-} = {
-  cherry: {
-    child: 10,
-    prob: [1265, 1248, 1218, 1142, 1071, 988],
-    kKeys: ['all_games'],
-  },
-  suica: {
-    child: 10,
-    prob: [599, 588, 574, 554, 527, 499],
-    kKeys: ['all_games'],
-  },
-  // chance: { prob: [], kKeys: [] },
-  b_hbb: {
-    child: 10,
-    prob: [16384, 16384, 15241, 14894, 14247, 13374],
-    kKeys: ['all_games'],
-  },
-  b_nbb: {
-    child: 10,
-    prob: [4121, 3996, 3832, 3681, 3504, 3343],
-    kKeys: ['all_games'],
-  },
-  b_rb: {
-    child: 10,
-    prob: [4965, 4891, 4648, 3996, 3601, 3361],
-    kKeys: ['all_games'],
-  },
-  b_cherry_rb: {
-    child: 10,
-    prob: [43691, 43691, 40960, 21845, 18204, 17246],
-    kKeys: ['all_games'],
-  },
-  b_chance_rb: {
-    child: 10,
-    prob: [163840, 163840, 109227, 81920, 54613, 40960],
-    kKeys: ['all_games'],
-  },
-  b_bell_red7: {
-    child: 10,
-    prob: [32768, 29789, 26214, 23406, 21845, 19859],
-    kKeys: ['all_games'],
-  },
-  bg_default: {
-    child: 1000,
-    prob: [1497, 1724, 1658, 1980, 2008, 2325],
-    kKeys: [
-      'bg_default',
-      'bg_kallen',
-      'bg_photo',
-      'bg_cc',
-      'bg_nana_suzu_lulu',
-      'bg_lulu_heroine',
-      'bg_black_knights',
-      'bg_oz',
-    ],
-  },
-  bg_kallen: {
-    child: 1000,
-    prob: [5319, 4000, 5319, 4000, 5319, 4000],
-    kKeys: [
-      'bg_default',
-      'bg_kallen',
-      'bg_photo',
-      'bg_cc',
-      'bg_nana_suzu_lulu',
-      'bg_lulu_heroine',
-      'bg_black_knights',
-      'bg_oz',
-    ],
-  },
-  bg_photo: {
-    child: 1000,
-    prob: [10000, 10000, 8000, 8000, 6666, 6666],
-    kKeys: [
-      'bg_default',
-      'bg_kallen',
-      'bg_photo',
-      'bg_cc',
-      'bg_nana_suzu_lulu',
-      'bg_lulu_heroine',
-      'bg_black_knights',
-      'bg_oz',
-    ],
-  },
-  bg_cc: {
-    child: 1000,
-    prob: [22222, 22222, 16666, 16666, 10000, 10000],
-    kKeys: [
-      'bg_default',
-      'bg_kallen',
-      'bg_photo',
-      'bg_cc',
-      'bg_nana_suzu_lulu',
-      'bg_lulu_heroine',
-      'bg_black_knights',
-      'bg_oz',
-    ],
-  },
-  bg_nana_suzu_lulu: {
-    prob: [0, 4, 4, 20, 20, 20],
-    kKeys: [
-      'bg_default',
-      'bg_kallen',
-      'bg_photo',
-      'bg_cc',
-      'bg_nana_suzu_lulu',
-      'bg_lulu_heroine',
-      'bg_black_knights',
-      'bg_oz',
-    ],
-  },
-  bg_lulu_heroine: {
-    prob: [0, 0, 0, 100, 100, 100],
-    kKeys: [
-      'bg_default',
-      'bg_kallen',
-      'bg_photo',
-      'bg_cc',
-      'bg_nana_suzu_lulu',
-      'bg_lulu_heroine',
-      'bg_black_knights',
-      'bg_oz',
-    ],
-  },
-  bg_black_knights: {
-    prob: [0, 0, 0, 0, 200, 200],
-    kKeys: [
-      'bg_default',
-      'bg_kallen',
-      'bg_photo',
-      'bg_cc',
-      'bg_nana_suzu_lulu',
-      'bg_lulu_heroine',
-      'bg_black_knights',
-      'bg_oz',
-    ],
-  },
-  bg_oz: {
-    prob: [0, 0, 0, 0, 0, 200],
-    kKeys: [
-      'bg_default',
-      'bg_kallen',
-      'bg_photo',
-      'bg_cc',
-      'bg_nana_suzu_lulu',
-      'bg_lulu_heroine',
-      'bg_black_knights',
-      'bg_oz',
-    ],
-  },
-  // ed_bg_default: { prob: [], kKeys: [] },
-  // ed_bg_gathering: { prob: [], kKeys: [] },
-  at_infinite_promotion: {
-    child: 10,
-    prob: [9930, 9930, 9638, 5958, 4256, 3310],
-    kKeys: ['ed_bg_gathering'],
-  },
-  tr_bronze: {
-    prob: [0, 1, 1, 1, 1, 1],
-    kKeys: ['all_games'],
-  },
-  tr_silver: {
-    prob: [0, 0, 1, 1, 1, 1],
-    kKeys: ['all_games'],
-  },
-  tr_gold: {
-    prob: [0, 0, 0, 1, 1, 1],
-    kKeys: ['all_games'],
-  },
-  tr_kirin: {
-    prob: [0, 0, 0, 0, 1, 1],
-    kKeys: ['all_games'],
-  },
-  tr_rainbow: {
-    prob: [0, 0, 0, 0, 0, 1],
-    kKeys: ['all_games'],
-  },
-};
-
 export type InputForm = {
   [key in Elements]: number | '';
 };
 
-const getKeys = <T extends Record<string, unknown>>(obj: T): (keyof T)[] =>
-  Object.keys(obj);
+const CalcDataMap = new Map<
+  Elements,
+  {
+    child?: number;
+    prob: [number, number, number, number, number, number];
+    kKeys: Elements[];
+  }
+>([
+  [
+    'cherry',
+    {
+      child: 10,
+      prob: [1265, 1248, 1218, 1142, 1071, 988],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'suica',
+    {
+      child: 10,
+      prob: [599, 588, 574, 554, 527, 499],
+      kKeys: ['all_games'],
+    },
+  ],
+  // chance
+  [
+    'b_hbb',
+    {
+      child: 10,
+      prob: [16384, 16384, 15241, 14894, 14247, 13374],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'b_nbb',
+    {
+      child: 10,
+      prob: [4121, 3996, 3832, 3681, 3504, 3343],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'b_rb',
+    {
+      child: 10,
+      prob: [4965, 4891, 4648, 3996, 3601, 3361],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'b_cherry_rb',
+    {
+      child: 10,
+      prob: [43691, 43691, 40960, 21845, 18204, 17246],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'b_chance_rb',
+    {
+      child: 10,
+      prob: [163840, 163840, 109227, 81920, 54613, 40960],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'b_bell_red7',
+    {
+      child: 10,
+      prob: [32768, 29789, 26214, 23406, 21845, 19859],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'bg_default',
+    {
+      child: 1000,
+      prob: [1497, 1724, 1658, 1980, 2008, 2325],
+      kKeys: [
+        'bg_default',
+        'bg_kallen',
+        'bg_photo',
+        'bg_cc',
+        'bg_nana_suzu_lulu',
+        'bg_lulu_heroine',
+        'bg_black_knights',
+        'bg_oz',
+      ],
+    },
+  ],
+  [
+    'bg_kallen',
+    {
+      child: 1000,
+      prob: [5319, 4000, 5319, 4000, 5319, 4000],
+      kKeys: [
+        'bg_default',
+        'bg_kallen',
+        'bg_photo',
+        'bg_cc',
+        'bg_nana_suzu_lulu',
+        'bg_lulu_heroine',
+        'bg_black_knights',
+        'bg_oz',
+      ],
+    },
+  ],
+  [
+    'bg_photo',
+    {
+      child: 1000,
+      prob: [10000, 10000, 8000, 8000, 6666, 6666],
+      kKeys: [
+        'bg_default',
+        'bg_kallen',
+        'bg_photo',
+        'bg_cc',
+        'bg_nana_suzu_lulu',
+        'bg_lulu_heroine',
+        'bg_black_knights',
+        'bg_oz',
+      ],
+    },
+  ],
+  [
+    'bg_cc',
+    {
+      child: 1000,
+      prob: [22222, 22222, 16666, 16666, 10000, 10000],
+      kKeys: [
+        'bg_default',
+        'bg_kallen',
+        'bg_photo',
+        'bg_cc',
+        'bg_nana_suzu_lulu',
+        'bg_lulu_heroine',
+        'bg_black_knights',
+        'bg_oz',
+      ],
+    },
+  ],
+  [
+    'bg_nana_suzu_lulu',
+    {
+      prob: [0, 4, 4, 20, 20, 20],
+      kKeys: [
+        'bg_default',
+        'bg_kallen',
+        'bg_photo',
+        'bg_cc',
+        'bg_nana_suzu_lulu',
+        'bg_lulu_heroine',
+        'bg_black_knights',
+        'bg_oz',
+      ],
+    },
+  ],
+  [
+    'bg_lulu_heroine',
+    {
+      prob: [0, 0, 0, 100, 100, 100],
+      kKeys: [
+        'bg_default',
+        'bg_kallen',
+        'bg_photo',
+        'bg_cc',
+        'bg_nana_suzu_lulu',
+        'bg_lulu_heroine',
+        'bg_black_knights',
+        'bg_oz',
+      ],
+    },
+  ],
+  [
+    'bg_black_knights',
+    {
+      prob: [0, 0, 0, 0, 200, 200],
+      kKeys: [
+        'bg_default',
+        'bg_kallen',
+        'bg_photo',
+        'bg_cc',
+        'bg_nana_suzu_lulu',
+        'bg_lulu_heroine',
+        'bg_black_knights',
+        'bg_oz',
+      ],
+    },
+  ],
+  [
+    'bg_oz',
+    {
+      prob: [0, 0, 0, 0, 0, 200],
+      kKeys: [
+        'bg_default',
+        'bg_kallen',
+        'bg_photo',
+        'bg_cc',
+        'bg_nana_suzu_lulu',
+        'bg_lulu_heroine',
+        'bg_black_knights',
+        'bg_oz',
+      ],
+    },
+  ],
+  // ed_bg_default
+  // ed_bg_gathering
+  [
+    'at_infinite_promotion',
+    {
+      child: 10,
+      prob: [9930, 9930, 9638, 5958, 4256, 3310],
+      kKeys: ['ed_bg_gathering'],
+    },
+  ],
+  [
+    'tr_bronze',
+    {
+      prob: [0, 1, 1, 1, 1, 1],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'tr_silver',
+    {
+      prob: [0, 0, 1, 1, 1, 1],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'tr_gold',
+    {
+      prob: [0, 0, 0, 1, 1, 1],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'tr_kirin',
+    {
+      prob: [0, 0, 0, 0, 1, 1],
+      kKeys: ['all_games'],
+    },
+  ],
+  [
+    'tr_rainbow',
+    {
+      prob: [0, 0, 0, 0, 0, 1],
+      kKeys: ['all_games'],
+    },
+  ],
+]);
 
-const defaultValues = ElementsArr.reduce((a, c) => {
-  a[c] = '';
-  return a;
-}, {} as InputForm);
+const defaultValues = ElementsArr.reduce(
+  (a, c) => void (a[c] = '') ?? a,
+  {} as InputForm
+);
 
-const FlexCenterBox = ({ children }: { children: React.ReactNode }) => (
+const calcPromises = (data: InputForm) =>
+  [...CalcDataMap].flatMap(([key, { kKeys, prob, child: p1 = 1 }]) => {
+    const k = data[key];
+    if (!k) return [];
+
+    const n = kKeys
+      .flatMap((kKey) => ((v) => (v !== '' ? v : []))(data[kKey]))
+      .reduce((a, c) => a + c, 0);
+
+    return n !== 0 ? Promise.all(prob.map((p2) => probCalc(n, k, p1, p2))) : [];
+  });
+
+const FlexCenterBox = ({ children }: { children: ReactNode }) => (
   <Box
     sx={{
       display: 'flex',
@@ -263,29 +339,7 @@ const App = (): JSX.Element => {
   });
 
   const onSubmit: SubmitHandler<InputForm> = async (data) => {
-    const checkData = ElementsArr.reduce((a, c) => {
-      const num = data[c];
-      if (num !== '') a[c] = num;
-      return a;
-    }, {} as { [key in Elements]?: number });
-
-    const results = await Promise.all(
-      getKeys(checkData).flatMap((key) => {
-        const data = CalcData[key];
-        if (data == null || data.prob.length === 0) return [];
-
-        const n = data.kKeys
-          .map((v) => checkData[v])
-          .filter((v): v is number => typeof v == 'number')
-          .reduce((a, c) => a + c, 0);
-        if (n === 0) return [];
-
-        const k = checkData[key] as number;
-        const p1 = data.child || 1;
-
-        return [probCalc(n, k, p1, data.prob)];
-      })
-    );
+    const results = await Promise.all(calcPromises(data));
 
     if (results.length === 0) return setSettings(Array(6).fill('-'));
 

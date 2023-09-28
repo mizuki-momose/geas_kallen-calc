@@ -7,9 +7,12 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
-import { type Elements, ElementsArr, type InputForm } from './App';
+import type { Elements, InputForm } from './App';
 
-const InpuitList = [
+const InpuitList: {
+  label: string;
+  input: { name: string; key: Elements }[];
+}[] = [
   {
     label: 'ゲーム数',
     input: [
@@ -70,9 +73,6 @@ const InpuitList = [
   },
 ];
 
-const isElements = (arg: string): arg is Elements =>
-  ElementsArr.some((v) => v === arg);
-
 export const InputArea = (props: {
   register: UseFormRegister<InputForm>;
 }): JSX.Element => {
@@ -97,11 +97,9 @@ export const InputArea = (props: {
               <Stack component="form" spacing={2} autoComplete="off">
                 {input.map(({ name, key }) => (
                   <TextField
-                    {...(isElements(key) &&
-                      register(key, {
-                        setValueAs: (value: string) =>
-                          value === '' ? '' : Number(value),
-                      }))}
+                    {...register(key, {
+                      setValueAs: (v) => (v === '' ? '' : Number(v)),
+                    })}
                     key={key}
                     label={name}
                     name={key}
